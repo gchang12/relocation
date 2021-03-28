@@ -41,7 +41,7 @@ def percent_data(state_or_year):
         if column == 'population':
             continue
         est_data[column]=est_data[column]/est_data['population']
-    est_data=est_data.drop(axis=1,labels='population')
+    #est_data=est_data.drop(axis=1,labels='population')
     return est_data
 
 def make_data_folders():
@@ -102,5 +102,9 @@ def save_nat_data():
     for year in names_in('year'):
         save_crime_data(year,national=True,crime_data=national_data(year))
 
+def save_data():
+    for folder in ('by_state','by_year','national'):
+        excel_data(folder)
+
 if __name__ == '__main__':
-    excel_data('national')
+    save_data()
