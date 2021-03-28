@@ -69,13 +69,13 @@ def save_crime_data(state_or_year,national=False,crime_data=None):
     filename=sep.join((folder,filename))
     crime_data.to_csv(filename)
 
-def save_all_data():
+def save_year_state_data():
     columns='state_name','year'
     for column in columns:
         for name in names_in(column):
             save_crime_data(name)
 
-def excel_data(folder):
+def data_to_excel(folder):
     dirnames=['.','crime_data',folder]
     search_dir=sep.join(dirnames)
     dirnames[-1]=folder+'.xlsx'
@@ -98,13 +98,13 @@ def national_data(year):
         crime_data.loc[row_name,:]/=last_row
     return crime_data
 
-def save_nat_data():
+def save_national_data():
     for year in names_in('year'):
         save_crime_data(year,national=True,crime_data=national_data(year))
 
-def save_data():
+def all_data_to_excel():
     for folder in ('by_state','by_year','national'):
-        excel_data(folder)
+        data_to_excel(folder)
 
 if __name__ == '__main__':
-    save_data()
+    all_data_to_excel()
