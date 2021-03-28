@@ -23,6 +23,32 @@ def state_data(state_name,category,show_estimate):
     if not exists(state_folder):
         mkdir(state_folder)
     filename=sep.join((state_folder,category+'.csv'))
+    if not exists(filename):
+        class FileError(Exception):
+            def __init__(self,message):
+                self.message=message
+        message=(\
+            '',\
+            'The file below was not found:',\
+            filename,\
+            ''
+            )
+        message='\n\n'.join(message)
+        instructions=(\
+            '1. Follow this link:\n\nhttps://data.census.gov/cedsci/profile?q=United%20States&g=0100000US\n',\
+            '2. Find tables DP03 (employment) and DP04 (housing)',\
+            '3. Filter to state of choice',\
+            '4. Filter to counties within %s'%state_name.capitalize(),\
+            '5. Remove Margin of Error fields',\
+            '6. Click ``Excel\'\' and download as .csv',\
+            '7. Relabel as ``%s.csv\'\''%category.lower(),\
+            '8. Create folder within ``state\'\' folder and rename as ``%s\'\''%state_name.lower(),\
+            '9. Insert .csv file into ``%s\'\''%filename[:filename.index(category.lower())-1],\
+            '10. Rerun script.'
+            )
+        instructions='\n'.join(instructions)
+        message+=instructions
+        raise FileError(message)
     data=pd.read_csv(filename,index_col=0)
     if show_estimate:
         start=0
