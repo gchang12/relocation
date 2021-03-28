@@ -1,14 +1,3 @@
-#   https://data.census.gov/cedsci/profile?q=United%20States&g=0100000US
-#   1   Go to above site
-#   2   Find tables DP03 (employment) and DP04 (housing)
-#   3   Filter to state of choice
-#   4   Filter to counties within state
-#   5   Remove Margin of Error fields
-#   6   Click ``Excel'' and download as .csv
-#   7   Create folder within ``state'' folder and rename as state of choice
-#   8   Insert .csv file and relabel as `employment' or 'housing'
-#   9   Execute this script
-
 from os import mkdir
 from os.path import exists, sep
 
