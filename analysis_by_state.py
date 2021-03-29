@@ -23,17 +23,20 @@ def state_data(state_name,category,show_estimate):
             ''
             )
         message='\n\n'.join(message)
+        state_folder=filename[:filename.index(category)-1]
+        table_name=('DP03' if category == 'employment' else 'DP04')
+        if not exists(state_folder):
+            mkdir(state_folder)
         instructions=(\
             '1. Follow this link:\n\nhttps://data.census.gov/cedsci/profile?q=United%20States&g=0100000US\n',\
-            '2. Find tables DP03 (employment) and DP04 (housing)',\
+            '2. Find the link to Table %s and then open it'%table_name,\
             '3. Filter to state of choice',\
             '4. Filter to counties within %s'%state_name.capitalize(),\
             '5. Remove Margin of Error fields',\
             '6. Click ``Excel\'\' and download as .csv',\
-            '7. Relabel as ``%s.csv\'\''%category.lower(),\
-            '8. Create folder within ``state\'\' folder and rename as ``%s\'\''%state_name.lower(),\
-            '9. Insert .csv file into ``%s\'\''%filename[:filename.index(category.lower())-1],\
-            '10. Rerun script.'
+            '7. Relabel as ``%s.csv\'\''%category,\
+            '8. Insert ``%s.csv\'\' into ``%s\'\''%(category,state_folder),\
+            '9. Rerun script.'
             )
         instructions='\n'.join(instructions)
         message+=instructions
@@ -108,9 +111,10 @@ def xl_data_writer(state_name,category,show_estimate=True):
         for sheet_name,sheet in data_sheets.items():
             sheet.transpose().to_excel(writer,sheet_name=sheet_name)
 
+def compile_data_into_excel(state_name):
+    for category in ('housing','employment'):
+        for boolean in (True,False):
+            xl_data_writer(state_name,category,show_estimate=boolean)
+
 if __name__ == '__main__':
-    categories='housing','employment'
-    booleans=True,False
-    for c in categories:
-        for b in booleans:
-            xl_data_writer('washington',c,b)
+    compile_data_into_excel('washington')
