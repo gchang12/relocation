@@ -6,7 +6,6 @@ from os import mkdir, walk
 import pandas as pd
 
 renting='renting.csv'
-sunset_times='sunset-times.csv'
 employment='employment.csv'
 
 def us_data(file,percent=False):
