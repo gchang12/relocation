@@ -29,19 +29,30 @@ def state_data(state_name,category,show_estimate):
         table_name=('DP03' if category == 'employment' else 'DP04')
         if not exists(state_folder):
             mkdir(state_folder)
-        link='https://data.census.gov/cedsci/table?q=ACSDP1Y2019.%s%20United%20States&tid=ACSDP1Y2019.%s&moe=false&hidePreview=true'%(table_name,table_name)
-        instructions=(\
-            '1. Follow this link:\n\n%s\n'%link,\
-            '2. Filter to state of choice',\
-            '3. Filter to counties within %s'%state_name.capitalize(),\
-            '4. Click ``Excel\'\' and download as .csv',\
-            '5. Relabel as ``%s.csv\'\''%category,\
-            '6. Insert ``%s.csv\'\' into ``%s\'\''%(category,state_folder),\
-            '7. Rerun script.'
+        link=(\
+            'https://data.census.gov/cedsci/table?q=ACSDP1Y2019.',\
+            table_name,\
+            '%20United%20States&tid=ACSDP1Y2019.',\
+            table_name,\
+            '&moe=false&hidePreview=true'
             )
-        instructions='\n'.join(instructions)
-        message+=instructions
-        raise FileError(message)
+        link=''.join(link)
+        steps=(\
+            'Follow this link:\n\n%s\n'%link,\
+            'Filter to State of %s'%state_name.capitalize(),\
+            'Filter to counties within %s'%state_name.capitalize(),\
+            'Click ``Excel\'\' and download as .csv',\
+            'Relabel as ``%s.csv\'\''%category,\
+            'Insert ``%s.csv\'\' into folder ``%s\'\''%(category,state_folder),\
+            'Rerun script.'
+            )
+        new_steps=()
+        for n,step in enumerate(steps,start=1):
+            n=str(n)
+            step=n+'. '+step
+            new_steps+=(step,)
+        steps='\n'.join(new_steps)
+        raise FileError(message+steps)
     data=pd.read_csv(filename,index_col=0)
     if show_estimate:
         start=0
