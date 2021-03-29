@@ -51,6 +51,18 @@ def state_data(state_name,category,show_estimate):
     data=data.iloc[:,start::2]
     new_columns=()
     for column in data.columns:
+        if state_name.capitalize() not in column:
+            class CountyError(Exception):
+                def __init__(self,message):
+                    self.message=message
+            start=column.index(' County, ')
+            stop=column.index('!!')
+            locations=(column[:start],\
+                       column[start+len(' County, '):stop],\
+                       state_name.capitalize()
+                       )
+            message='\n\nThe County of %s is in %s, not %s.'%locations
+            raise CountyError(message)
         if ' County' in column:
             column_name=column[:column.index(' County')]
         else:
@@ -119,4 +131,4 @@ def compile_data_into_excel(state_name):
             xl_data_writer(state_name,category,show_estimate=boolean)
 
 if __name__ == '__main__':
-    compile_data_into_excel('washington')
+    compile_data_into_excel('indiana')

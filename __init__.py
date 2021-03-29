@@ -184,4 +184,8 @@ def merge_all_data(folder='xl_output'):
             csv_data_merger(folder,*args)
 
 if __name__=='__main__':
-    merge_all_data()
+    filename='2019_NIBRS_NATIONAL_MASTER_FILE_ENC_STATIC.txt'
+    with open(filename,'r') as rFile:
+        for line in rFile.readlines():
+            print(line)
+            break
