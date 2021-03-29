@@ -15,7 +15,7 @@ def state_data(state_name,category,show_estimate):
         mkdir(state_folder)
     filename=sep.join((state_folder,category+'.csv'))
     if not exists(filename):
-        class FileError(Exception):
+        class MissingFileError(Exception):
             def __init__(self,message):
                 self.message=message
         message=(\
@@ -39,20 +39,20 @@ def state_data(state_name,category,show_estimate):
         link=''.join(link)
         steps=(\
             'Follow this link:\n\n%s\n'%link,\
-            'Filter to State of %s'%state_name.capitalize(),\
-            'Filter to counties within %s'%state_name.capitalize(),\
-            'Click ``Excel\'\' and download as .csv',\
-            'Relabel as ``%s.csv\'\''%category,\
+            'Filter geography to State of %s'%state_name.capitalize(),\
+            'Filter geography to only counties within %s'%state_name.capitalize(),\
+            'Click ``Excel\'\' and click ``Export to CSV\'\'',\
+            'Save and relabel download as ``%s.csv\'\''%category,\
             'Insert ``%s.csv\'\' into folder ``%s\'\''%(category,state_folder),\
-            'Rerun script.'
+            'Rerun script'
             )
-        new_steps=()
+        num_steps=()
         for n,step in enumerate(steps,start=1):
             n=str(n)
             step=n+'. '+step
-            new_steps+=(step,)
-        steps='\n'.join(new_steps)
-        raise FileError(message+steps)
+            num_steps+=(step,)
+        steps='\n'.join(num_steps)
+        raise MissingFileError(message+steps)
     data=pd.read_csv(filename,index_col=0)
     if show_estimate:
         start=0
