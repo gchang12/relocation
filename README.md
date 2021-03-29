@@ -3,7 +3,7 @@ __init__.py
 - given in percentages and estimates
 
 crime_data_analysis.py
-- by_year: percentage-based crime data for each state by year
+- by_year: percentage-based crime data for each state in a given year
 - by_year: percentage-based crime data for given state from 1979 -- 2019
 - national: percentage of crime that each state contributes to the total crime rate in the nation
 
