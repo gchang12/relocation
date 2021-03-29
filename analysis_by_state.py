@@ -29,16 +29,15 @@ def state_data(state_name,category,show_estimate):
         table_name=('DP03' if category == 'employment' else 'DP04')
         if not exists(state_folder):
             mkdir(state_folder)
+        link='https://data.census.gov/cedsci/table?q=ACSDP1Y2019.%s%20United%20States&tid=ACSDP1Y2019.%s&moe=false&hidePreview=true'%(table_name,table_name)
         instructions=(\
-            '1. Follow this link:\n\nhttps://data.census.gov/cedsci/profile?q=United%20States&g=0100000US\n',\
-            '2. Find the link to Table %s and then open it'%table_name,\
-            '3. Filter to state of choice',\
-            '4. Filter to counties within %s'%state_name.capitalize(),\
-            '5. Remove Margin of Error fields',\
-            '6. Click ``Excel\'\' and download as .csv',\
-            '7. Relabel as ``%s.csv\'\''%category,\
-            '8. Insert ``%s.csv\'\' into ``%s\'\''%(category,state_folder),\
-            '9. Rerun script.'
+            '1. Follow this link:\n\n%s\n'%link,\
+            '2. Filter to state of choice',\
+            '3. Filter to counties within %s'%state_name.capitalize(),\
+            '4. Click ``Excel\'\' and download as .csv',\
+            '5. Relabel as ``%s.csv\'\''%category,\
+            '6. Insert ``%s.csv\'\' into ``%s\'\''%(category,state_folder),\
+            '7. Rerun script.'
             )
         instructions='\n'.join(instructions)
         message+=instructions
