@@ -5,7 +5,8 @@ from os import sep, mkdir, walk
 from os.path import exists
 
 def names_in(column):
-    filename='estimated_crimes_1979_2019.csv'
+    filename='source','estimated_crimes_1979_2019.csv'
+    filename=sep.join(filename)
     crime_data=pd.read_csv(filename)
     names=crime_data.loc[:,column]
     names.dropna(inplace=True)
@@ -17,7 +18,8 @@ def names_in(column):
     return names
 
 def parsed_data(state_or_year):
-    filename='estimated_crimes_1979_2019.csv'
+    filename='source','estimated_crimes_1979_2019.csv'
+    filename=sep.join(filename)
     crime_data=pd.read_csv(filename)
     crime_data.loc[:,'state_name'].fillna(value='TOTAL',inplace=True)
     if type(state_or_year) == int:

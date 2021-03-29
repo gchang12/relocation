@@ -5,9 +5,6 @@ from os import mkdir, walk
 
 import pandas as pd
 
-renting='renting.csv'
-employment='employment.csv'
-
 def us_data(file,percent=False):
     data=pd.read_csv(file,index_col=0)
     n=(1 if percent else 0)
@@ -58,7 +55,8 @@ def save_rent_and_employment_data(show_percent):
     def save_data(file,folder):
         args=(file,show_percent)
         save_section_data(folder,*args)
-    global renting, employment
+    renting=sep.join(('source','renting.csv'))
+    employment=sep.join(('source','employment.csv'))
     save_data(renting,'renting')
     save_data(employment,'employment')
 
@@ -74,6 +72,7 @@ def convert_to_percent(num_list):
                 perc_loc=num.index('%')
                 num=num[:perc_loc]
                 num=float(num)
+                num/=100
         new_list.append(num)
     return new_list
 
@@ -183,8 +182,4 @@ def merge_all_data(folder='xl_output'):
             csv_data_merger(folder,*args)
 
 if __name__=='__main__':
-    filename='2019_NIBRS_NATIONAL_MASTER_FILE_ENC_STATIC.txt'
-    with open(filename,'r') as rFile:
-        for line in rFile.readlines():
-            print(line)
-            break
+    merge_all_data()
