@@ -1,5 +1,6 @@
 __init__.py
-- Parses .csv files into .xlsx files to view employment/housing data by state
+- employment and housing statistics by state
+- given in percentages and estimates
 
 crime_data_analysis.py
 - by_year: percentage-based crime data for each state by year
