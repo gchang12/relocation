@@ -9,7 +9,7 @@ if not exists('state'):
     mkdir('state')
 
 def state_code(state_name):
-    code_file=sep.join(('source','census_data-dict.txt'))
+    code_file=sep.join(('source','census_data-dict.csv'))
     with open(code_file,mode='r') as rfile:
         for line in rfile.readlines():
             line=line.split(',')
@@ -21,20 +21,43 @@ def state_code(state_name):
             self.message=message
     raise MissingStateError(message)
 
-def url_to_state_data(state_name,category):
+def url_to_state_data(state_name,category,direct_link=True):
     #   Issue: Always includes United States within geographic filter; cannot remove
     table_name=('DP03' if category == 'employment' else 'DP04')
-    link=(\
-        'https://data.census.gov/cedsci/table?q=ACSDP1Y2019.',\
-        table_name,\
-        '%20United%20States',\
-        '&g=0400000US%s,%s.050000'%(state_code(state_name),state_code(state_name)),\
-        '&tid=ACSDP1Y2019.',\
-        table_name,\
-        '&moe=false&hidePreview=true'
-        )
-    link=''.join(link)
-    return link
+    state_folder=sep.join(('state',state_name.lower()))
+    if not direct_link:
+        link='https://data.census.gov/cedsci/profile?q=United%20States&g=0100000US'
+    else:
+        link=(\
+            'https://data.census.gov/cedsci/table?q=ACSDP1Y2019.',\
+            table_name,\
+            '%20United%20States',\
+            '&g=0400000US%s,%s.050000'%(state_code(state_name),state_code(state_name)),\
+            '&tid=ACSDP1Y2019.',\
+            table_name,\
+            '&moe=false&hidePreview=true'
+            )
+        link=''.join(link)
+    steps=[\
+        'Follow this link:\n\n%s\n'%link,\
+        'Navigate to Table %s located under the %s tab'%(table_name,category.capitalize()),\
+        'Remove Margin of Error fields',\
+        'Filter geography to State of %s'%state_name.capitalize(),\
+        'Filter geography to only counties within %s'%state_name.capitalize(),\
+        'Click ``Excel\'\' and click ``Export to CSV\'\'',\
+        'Save and relabel download as ``%s.csv\'\''%category,\
+        'Insert ``%s.csv\'\' into folder ``%s\'\''%(category,state_folder),\
+        'Rerun script'
+        ]
+    if direct_link:
+        steps=steps[0:1]+steps[5:]
+    num_steps=()
+    for n,step in enumerate(steps,start=1):
+        n=str(n)
+        step=n+'. '+step
+        num_steps+=(step,)
+    steps='\n'.join(num_steps)
+    return link,steps
 
 
 def state_data(state_name,category,show_estimate):
@@ -58,24 +81,7 @@ def state_data(state_name,category,show_estimate):
         table_name=('DP03' if category == 'employment' else 'DP04')
         if not exists(state_folder):
             mkdir(state_folder)
-        link='https://data.census.gov/cedsci/profile?q=United%20States&g=0100000US'
-        steps=(\
-            'Follow this link:\n\n%s\n'%link,\
-            'Navigate to Table %s located under the %s tab'%(table_name,category.capitalize()),\
-            'Remove Margin of Error fields',\
-            'Filter geography to State of %s'%state_name.capitalize(),\
-            'Filter geography to only counties within %s'%state_name.capitalize(),\
-            'Click ``Excel\'\' and click ``Export to CSV\'\'',\
-            'Save and relabel download as ``%s.csv\'\''%category,\
-            'Insert ``%s.csv\'\' into folder ``%s\'\''%(category,state_folder),\
-            'Rerun script'
-            )
-        num_steps=()
-        for n,step in enumerate(steps,start=1):
-            n=str(n)
-            step=n+'. '+step
-            num_steps+=(step,)
-        steps='\n'.join(num_steps)
+        link,steps=url_to_state_data(state_name,category,direct_link=True)
         raise MissingFileError(message+steps)
     data=pd.read_csv(filename,index_col=0)
     if show_estimate:
@@ -91,7 +97,10 @@ def state_data(state_name,category,show_estimate):
                     self.message=message
             stop=column.index('!!')
             no_county_states=('louisiana','alaska','puerto rico','district of columbia')
-            if state_name not in no_county_states:
+            if 'United States' in column:
+                data.drop(axis=1,labels=column,inplace=True)
+                continue
+            elif state_name not in no_county_states:
                 start=column.index(' County, ')
                 locations=(\
                     column[:start],\
@@ -110,6 +119,8 @@ def state_data(state_name,category,show_estimate):
             raise CountyError(message)
         if ' County' in column:
             column_name=column[:column.index(' County')]
+        elif state_name.capitalize() in column:
+            column_name='State of '+state_name.capitalize()
         else:
             column_name=column[:column.index('!!')]
         new_columns+=(column_name,)
@@ -175,4 +186,4 @@ def compile_data_into_excel(state_name):
             xl_data_writer(state_name,category,show_estimate=boolean)
 
 if __name__ == '__main__':
-    compile_data_into_excel('hawaii')
+    compile_data_into_excel('washington')
