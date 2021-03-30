@@ -8,6 +8,34 @@ import pandas as pd
 if not exists('state'):
     mkdir('state')
 
+def state_code(state_name):
+    code_file=sep.join(('source','census_data-dict.txt'))
+    with open(code_file,mode='r') as rfile:
+        for line in rfile.readlines():
+            line=line.split(',')
+            if line[0].lower() == state_name.lower():
+                return line[1].strip()
+    message='\n\n``%s\'\' is not in the U.S. Census database!'%state_name
+    class MissingStateError(Exception):
+        def __init__(self,message):
+            self.message=message
+    raise MissingStateError(message)
+
+def url_to_state_data(state_name,category):
+    table_name=('DP03' if category == 'employment' else 'DP04')
+    link=(\
+        'https://data.census.gov/cedsci/table?q=ACSDP1Y2019.',\
+        table_name,\
+        '%20United%20States',\
+        '&g=0400000US%s,%s.050000'%(state_code(state_name),state_code(state_name)),\
+        '&tid=ACSDP1Y2019.',\
+        table_name,\
+        '&moe=false&hidePreview=true'
+        )
+    link=''.join(link)
+    return link
+
+
 def state_data(state_name,category,show_estimate):
     assert category in ('employment','housing')
     state_folder=sep.join(('state',state_name.lower()))
@@ -29,16 +57,11 @@ def state_data(state_name,category,show_estimate):
         table_name=('DP03' if category == 'employment' else 'DP04')
         if not exists(state_folder):
             mkdir(state_folder)
-        link=(\
-            'https://data.census.gov/cedsci/table?q=ACSDP1Y2019.',\
-            table_name,\
-            '%20United%20States&tid=ACSDP1Y2019.',\
-            table_name,\
-            '&moe=false&hidePreview=true'
-            )
-        link=''.join(link)
+        link='https://data.census.gov/cedsci/profile?q=United%20States&g=0100000US'
         steps=(\
             'Follow this link:\n\n%s\n'%link,\
+            'Navigate to Table %s located under the %s tab'%(table_name,category.capitalize()),\
+            'Remove Margin of Error fields',\
             'Filter geography to State of %s'%state_name.capitalize(),\
             'Filter geography to only counties within %s'%state_name.capitalize(),\
             'Click ``Excel\'\' and click ``Export to CSV\'\'',\
@@ -66,7 +89,8 @@ def state_data(state_name,category,show_estimate):
                 def __init__(self,message):
                     self.message=message
             stop=column.index('!!')
-            if state_name not in ('louisiana','alaska'):
+            no_county_states=('louisiana','alaska','puerto rico','district of columbia')
+            if state_name not in no_county_states:
                 start=column.index(' County, ')
                 locations=(\
                     column[:start],\
@@ -119,7 +143,6 @@ def numeric_converter(state_name,category,show_estimate):
         for column in data.columns:
             numerical_values=[]
             for value in data.loc[:,column].values:
-                rtext=''
                 divisor=1
                 delimiters=',','%','.'
                 if '%' in value:
@@ -151,4 +174,4 @@ def compile_data_into_excel(state_name):
             xl_data_writer(state_name,category,show_estimate=boolean)
 
 if __name__ == '__main__':
-    compile_data_into_excel('ohio')
+    compile_data_into_excel('hawaii')
