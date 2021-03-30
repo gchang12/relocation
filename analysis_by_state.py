@@ -22,6 +22,7 @@ def state_code(state_name):
     raise MissingStateError(message)
 
 def url_to_state_data(state_name,category):
+    #   Issue: Always includes United States within geographic filter; cannot remove
     table_name=('DP03' if category == 'employment' else 'DP04')
     link=(\
         'https://data.census.gov/cedsci/table?q=ACSDP1Y2019.',\
