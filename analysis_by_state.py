@@ -19,46 +19,49 @@ def state_code(state_name):
     class MissingStateError(Exception):
         def __init__(self,message):
             self.message=message
-    raise MissingStateError(message)
+    raise MissingStateError('\n\n'+message)
 
-def url_to_state_data(state_name,category,direct_link=True):
-    #   Issue: Always includes United States within geographic filter; cannot remove
-    table_name=('DP03' if category == 'employment' else 'DP04')
-    state_folder=sep.join(('state',state_name.lower()))
-    if not direct_link:
-        link='https://data.census.gov/cedsci/profile?q=United%20States&g=0100000US'
+def link_maker(state_name,category):
+    assert category in ('employment','housing')
+    table_name='DP0'
+    if category == 'employment':
+        suffix='3'
     else:
-        link=(\
-            'https://data.census.gov/cedsci/table?q=ACSDP1Y2019.',\
-            table_name,\
-            '%20United%20States',\
-            '&g=0400000US%s,%s.050000'%(state_code(state_name),state_code(state_name)),\
-            '&tid=ACSDP1Y2019.',\
-            table_name,\
-            '&moe=false&hidePreview=true'
-            )
-        link=''.join(link)
+        suffix='4'
+    table_name+=suffix
+    link=(\
+        'https://data.census.gov/cedsci/table?q=ACSDP1Y2019.',\
+        table_name,\
+        '%20United%20States',\
+        '&g=0400000US%s,%s.050000'%(state_code(state_name),state_code(state_name)),\
+        '&tid=ACSDP1Y2019.',\
+        table_name,\
+        '&moe=false&hidePreview=true'
+        )
+    link=''.join(link)
+    return link
+
+def url_to_state_data(state_name,category):
+    #   Issue: Always includes United States within geographic filter; cannot remove
+    state_folder=sep.join(('state',state_name.lower()))
+    housing_link=link_maker(state_name,'housing')
+    employment_link=link_maker(state_name,'employment')
     steps=[\
-        'Follow this link:\n\n%s\n'%link,\
-        'Navigate to Table %s located under the %s tab'%(table_name,category.capitalize()),\
-        'Remove Margin of Error fields',\
-        'Filter geography to State of %s'%state_name.capitalize(),\
-        'Filter geography to only counties within %s'%state_name.capitalize(),\
+        'Follow these links:\n',\
+        'housing.csv\n%s\n'%housing_link,\
+        'employment.csv\n%s\n'%employment_link,\
         'Click ``Excel\'\' and click ``Export to CSV\'\'',\
-        'Save and relabel download as ``%s.csv\'\''%category,\
-        'Insert ``%s.csv\'\' into folder ``%s\'\''%(category,state_folder),\
-        'Rerun script'
+        'Save and relabel files as indicated.',\
+        'Insert .csv files into folder ``%s\'\''%state_folder,\
+        'Rerun script.'
         ]
-    if direct_link:
-        steps=steps[0:1]+steps[5:]
     num_steps=()
     for n,step in enumerate(steps,start=1):
         n=str(n)
         step=n+'. '+step
         num_steps+=(step,)
-    steps='\n'.join(num_steps)
-    return link,steps
-
+    steps='\n\n'+'\n'.join(num_steps)
+    return steps
 
 def state_data(state_name,category,show_estimate):
     assert category in ('employment','housing')
@@ -70,19 +73,11 @@ def state_data(state_name,category,show_estimate):
         class MissingFileError(Exception):
             def __init__(self,message):
                 self.message=message
-        message=(\
-            '',\
-            'The file below was not found:',\
-            filename,\
-            ''
-            )
-        message='\n\n'.join(message)
         state_folder=filename[:filename.index(category)-1]
-        table_name=('DP03' if category == 'employment' else 'DP04')
         if not exists(state_folder):
             mkdir(state_folder)
-        link,steps=url_to_state_data(state_name,category,direct_link=True)
-        raise MissingFileError(message+steps)
+        steps=url_to_state_data(state_name,category)
+        raise MissingFileError(steps)
     data=pd.read_csv(filename,index_col=0)
     if show_estimate:
         start=0
@@ -115,7 +110,7 @@ def state_data(state_name,category,show_estimate):
                     column[start+len(', '):stop],\
                     state_name.capitalize()
                     )
-                message='\n\n%s is in %s, not %s'%locations
+                message='\n\n%s is in %s, not %s.'%locations
             raise CountyError(message)
         if ' County' in column:
             column_name=column[:column.index(' County')]
@@ -186,4 +181,4 @@ def compile_data_into_excel(state_name):
             xl_data_writer(state_name,category,show_estimate=boolean)
 
 if __name__ == '__main__':
-    compile_data_into_excel('washington')
+    compile_data_into_excel('michigan')
