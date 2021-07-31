@@ -175,6 +175,18 @@ def xl_data_writer(state_name,category,show_estimate=True):
         for sheet_name,sheet in data_sheets.items():
             sheet.transpose().to_excel(writer,sheet_name=sheet_name)
 
+def csv_data_writer(state_name,category,show_estimate=True):            
+    data_sheets=numeric_converter(state_name,category,show_estimate)
+    if show_estimate:
+        subdir='estimate'
+    else:
+        subdir='percent'
+    filename=sep.join(('state',state_name.lower(),category,subdir))
+    with pd.ExcelWriter(filename,mode='w') as writer:
+        for sheet_name,sheet in data_sheets.items():
+            sheet_name=sep.join((filename,sheet_name))
+            sheet.to_csv(sheet_name)
+            
 def compile_data_into_excel(state_name):
     for category in ('housing','employment'):
         for boolean in (True,False):
