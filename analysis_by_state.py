@@ -182,15 +182,23 @@ def csv_data_writer(state_name,category,show_estimate=True):
     else:
         subdir='percent'
     filename=sep.join(('state',state_name.lower(),category,subdir))
-    with pd.ExcelWriter(filename,mode='w') as writer:
-        for sheet_name,sheet in data_sheets.items():
-            sheet_name=sep.join((filename,sheet_name))
-            sheet.to_csv(sheet_name)
-            
-def compile_data_into_excel(state_name):
+    for sheet_name,sheet in data_sheets.items():
+        sheet_name=sep.join((filename,sheet_name))
+        sheet.to_csv(sheet_name)
+
+def compile_all(state_name,data_type='excel'):
+    if data_type == 'excel':
+        writer_func=xl_data_writer
+    elif data_type == 'csv':
+        writer_func=csv_data_writer
     for category in ('housing','employment'):
         for boolean in (True,False):
-            xl_data_writer(state_name,category,show_estimate=boolean)
-
+            kw={
+                'state_name':state_name,\
+                'category':category,\
+                'show_estimate':boolean
+            }
+            writer_func(**kw)
+            
 if __name__ == '__main__':
-    compile_data_into_excel('michigan')
+    compile_excel('michigan')
